@@ -131,7 +131,13 @@ func (m *MetadataClient) getContainersDnsRecords(dnsEntries map[string]utils.Met
 			}
 
 			var externalIP string
-			if ip, ok := host.Labels["io.rancher.host.external_dns_ip"]; ok && len(ip) > 0 {
+			
+			// Allow setting IP from service label
+			if service_provided_ip, ok := service.Labels["io.rancher.service.external_dns_ip"]; ok {
+ 				externalIP = service_provided_ip
+			}
+			
+			if ip, ok := host.Labels["io.rancher.host.external_dns_ip"]; ok && len(ip) > 0 && len(externalIP) == 0 {
 				externalIP = ip
 			} else if len(container.Ports) > 0 {
 				if ip, ok := parsePortToIP(container.Ports[0]); ok {
